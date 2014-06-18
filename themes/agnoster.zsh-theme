@@ -26,8 +26,8 @@
 # A few utility functions to make it easy and re-usable to draw segmented prompts
 
 CURRENT_BG='NONE'
-SEGMENT_SEPARATOR=''
-
+SEGMENT_SEPARATOR='⮀'
+ 
 # Begin a segment
 # Takes two arguments, background and foreground. Both can be omitted,
 # rendering default background/foreground.
@@ -69,10 +69,9 @@ prompt_context() {
 
 # Git: branch/detached head, dirty status
 prompt_git() {
-  local ref dirty mode repo_path
-  repo_path=$(git rev-parse --git-dir 2>/dev/null)
-
+  local ref dirty
   if $(git rev-parse --is-inside-work-tree >/dev/null 2>&1); then
+    ZSH_THEME_GIT_PROMPT_DIRTY='±'
     dirty=$(parse_git_dirty)
     ref=$(git symbolic-ref HEAD 2> /dev/null) || ref="➦ $(git show-ref --head -s --abbrev |head -n1 2> /dev/null)"
     if [[ -n $dirty ]]; then
@@ -80,27 +79,19 @@ prompt_git() {
     else
       prompt_segment green black
     fi
+   echo -n "${ref/refs\/heads\//⭠ }$dirty"
+   # setopt promptsubst
+   # autoload -Uz vcs_info
 
-    if [[ -e "${repo_path}/BISECT_LOG" ]]; then
-      mode=" <B>"
-    elif [[ -e "${repo_path}/MERGE_HEAD" ]]; then
-      mode=" >M<"
-    elif [[ -e "${repo_path}/rebase" || -e "${repo_path}/rebase-apply" || -e "${repo_path}/rebase-merge" || -e "${repo_path}/../.dotest" ]]; then
-      mode=" >R>"
-    fi
-
-    setopt promptsubst
-    autoload -Uz vcs_info
-
-    zstyle ':vcs_info:*' enable git
-    zstyle ':vcs_info:*' get-revision true
-    zstyle ':vcs_info:*' check-for-changes true
-    zstyle ':vcs_info:*' stagedstr '✚'
-    zstyle ':vcs_info:git:*' unstagedstr '●'
-    zstyle ':vcs_info:*' formats ' %u%c'
-    zstyle ':vcs_info:*' actionformats ' %u%c'
-    vcs_info
-    echo -n "${ref/refs\/heads\// }${vcs_info_msg_0_%% }${mode}"
+   # zstyle ':vcs_info:*' enable git
+   # zstyle ':vcs_info:*' get-revision true
+   # zstyle ':vcs_info:*' check-for-changes true
+   # zstyle ':vcs_info:*' stagedstr '✚'
+   # zstyle ':vcs_info:git:*' unstagedstr '●'
+   # zstyle ':vcs_info:*' formats ' %u%c'
+   # zstyle ':vcs_info:*' actionformats '%u%c'
+   # vcs_info
+   # echo -n "${ref/refs\/heads\//± }${vcs_info_msg_0_}"
   fi
 }
 
@@ -166,6 +157,21 @@ prompt_status() {
   [[ -n "$symbols" ]] && prompt_segment black default "$symbols"
 }
 
+# SVN
+#prompt_svn() {
+#  if svn_is_inside; then
+#    ZSH_THEME_SVN_PROMPT_DIRTY='±'
+#    local ref dirty
+#    if svn_parse_dirty; then
+#      dirty=$ZSH_THEME_SVN_PROMPT_DIRTY
+#      prompt_segment yellow black
+#    else
+#      prompt_segment green black
+#    fi
+#    echo -n "⭠ $(svn_branch_name) $(svn_rev)$dirty"
+#  fi
+#}
+
 ## Main prompt
 build_prompt() {
   RETVAL=$?
@@ -175,6 +181,7 @@ build_prompt() {
   prompt_dir
   prompt_git
   prompt_hg
+#  prompt_svn
   prompt_end
 }
 
