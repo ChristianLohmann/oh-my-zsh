@@ -243,17 +243,7 @@ build_prompt() {
   prompt_dir
   prompt_git
   prompt_hg
-<<<<<<< HEAD
-#  prompt_svn
-prompt_end
-=======
-<<<<<<< HEAD
   prompt_end
-=======
-#  prompt_svn
-prompt_end
->>>>>>> added disambiguate function to shorten path
->>>>>>> added disambiguate function to shorten path
 }
 
 PROMPT='%{%f%b%k%}$(build_prompt) '
